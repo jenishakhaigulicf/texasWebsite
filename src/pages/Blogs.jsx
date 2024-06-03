@@ -85,7 +85,6 @@ const Blogs = () => {
     fetchData();
   }, []);
 
-  //   return <div>{JSON.stringify(blogs)}</div>;
   return (
     <>
       <ModalComponent onClose={onClose} isOpen={isOpen} />;

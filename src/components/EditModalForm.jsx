@@ -14,17 +14,20 @@ import {
   ModalOverlay,
   Textarea
 } from "@chakra-ui/react";
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import React from "react";
 
-const ModalComponent = ({ isOpen, onClose }) => {
-  const [input, setInput] = useState({
-    title: "",
-    body: "",
-    userId: ""
-  });
+const EditModalForm = ({ formMethods, isOpen, onClose }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    watch,
+    reset
+  } = formMethods;
 
-  const { id } = useParams();
+  const isTitleError = watch("title") === "";
+  const isBodyError = watch("body") === "";
+  const isUserIdError = watch("userId") === "";
 
   const postData = async (data) => {
     try {
@@ -36,7 +39,7 @@ const ModalComponent = ({ isOpen, onClose }) => {
         }
       );
       const json = await response.json();
-      setInput({
+      reset({
         title: "",
         body: "",
         userId: ""
@@ -47,46 +50,10 @@ const ModalComponent = ({ isOpen, onClose }) => {
     }
   };
 
-  const editData = async (data) => {
-    try {
-      const response = await fetch(
-        `https://jsonplaceholder.typicode.com/posts/${id}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify(data)
-        }
-      );
-      const json = await response.json();
-      setInput({
-        title: "",
-        body: "",
-        userId: ""
-      });
-      onClose();
-    } catch (e) {
-      console.log(e, "error");
-    }
+  const onSubmitHandler = (data) => {
+    postData(data);
   };
 
-  const handleInputChange = (e, key) => {
-    setInput((prevValue) => {
-      return { ...prevValue, [key]: e.target.value };
-    });
-  };
-
-  const onSubmitHandler = async () => {
-    (await id) ? editData(input) : postData(input);
-  };
-
-  // if(input.title === " ")
-  //  return true
-  // else return false
-  // isTitleError is true (a boolean value)
-  // when input ko title is empty string ie. ""
-  // else it is false
-  const isTitleError = input.title === "";
-  const isBodyError = input.body === "";
-  const isUserIdError = input.userId === "" || input.userId === "0";
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
@@ -96,47 +63,36 @@ const ModalComponent = ({ isOpen, onClose }) => {
         <ModalBody>
           <FormControl isInvalid={isTitleError}>
             <FormLabel>Title</FormLabel>
-            <Input
-              type="text"
-              value={input.title}
-              onChange={(e) => handleInputChange(e, "title")}
-            />
-            {!isTitleError ? (
+            <Input type="text" {...register("title")} />
+            {/* {!isTitleError ? (
               <FormHelperText>Enter the title of your blog</FormHelperText>
             ) : (
               <FormErrorMessage>
                 Please enter the title of your blog.
               </FormErrorMessage>
-            )}
+            )} */}
           </FormControl>
           <FormControl isInvalid={isBodyError}>
             <FormLabel>Body</FormLabel>
-            <Textarea
-              value={input.body}
-              onChange={(e) => handleInputChange(e, "body")}
-            />
-            {!isBodyError ? (
+            <Textarea {...register("body")} />
+            {/* {!isBodyError ? (
               <FormHelperText>Enter the body of your blog</FormHelperText>
             ) : (
               <FormErrorMessage>
                 Please enter the body of your blog.
               </FormErrorMessage>
-            )}
+            )} */}
           </FormControl>
           <FormControl isInvalid={isUserIdError}>
             <FormLabel>UserId</FormLabel>
-            <Input
-              type="text"
-              value={input.userId}
-              onChange={(e) => handleInputChange(e, "userId")}
-            />
-            {!isUserIdError ? (
+            <Input type="text" {...register("userId")} />
+            {/* {!isUserIdError ? (
               <FormHelperText>Enter the user id of your blog</FormHelperText>
             ) : (
               <FormErrorMessage>
                 Please enter the user id of your blog, 0 is invalid
               </FormErrorMessage>
-            )}
+            )} */}
           </FormControl>
         </ModalBody>
 
@@ -144,7 +100,7 @@ const ModalComponent = ({ isOpen, onClose }) => {
           <Button colorScheme="blue" mr={3} onClick={onClose}>
             Close
           </Button>
-          <Button variant="outline" onClick={onSubmitHandler}>
+          <Button variant="outline" onClick={handleSubmit(onSubmitHandler)}>
             Save
           </Button>
         </ModalFooter>
@@ -153,4 +109,4 @@ const ModalComponent = ({ isOpen, onClose }) => {
   );
 };
 
-export default ModalComponent;
+export default EditModalForm;
